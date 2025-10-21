@@ -1,7 +1,6 @@
 package colasyfilas;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.stream.Collectors;
 
 public class SimuladorGUI extends JFrame {
@@ -14,6 +13,8 @@ public class SimuladorGUI extends JFrame {
 
     private String clienteId = null;
     private String clienteNombre = null;
+    private String clienteEmail = null;
+    private String clienteTelefono = null;
     private boolean esUrgente = false;
     private JButton btnRegistrar;
 
@@ -91,9 +92,10 @@ public class SimuladorGUI extends JFrame {
     private void handleCapturar() {
         String inputId = null;
         String inputNombre = null;
+        String inputEmail = null;
+        String inputTelefono = null;
         boolean idValido = false;
 
-        // Bucle de validación para ID (Numérico, No Vacío, No Repetido)
         while (!idValido) {
             inputId = JOptionPane.showInputDialog(this, "Ingrese ID del cliente (solo números):");
 
@@ -110,7 +112,7 @@ public class SimuladorGUI extends JFrame {
             }
 
             try {
-                Long.parseLong(inputId); // Verifica que sea solo números
+                Long.parseLong(inputId);
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "El ID debe contener solo números.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
                 continue;
@@ -124,7 +126,6 @@ public class SimuladorGUI extends JFrame {
             idValido = true;
         }
 
-        // Bucle de validación para Nombre (No Vacío)
         while (true) {
             inputNombre = JOptionPane.showInputDialog(this, "Ingrese Nombre del cliente:");
             if (inputNombre == null) {
@@ -137,9 +138,55 @@ public class SimuladorGUI extends JFrame {
             JOptionPane.showMessageDialog(this, "El Nombre no puede estar vacío. Inténtelo de nuevo.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
         }
 
-        // Si llegamos aquí, los datos son válidos
+        while (true) {
+            inputEmail = JOptionPane.showInputDialog(this, "Ingrese Email del cliente (debe contener '@' y '.':");
+            if (inputEmail == null) {
+                inputEmail = "";
+                break;
+            }
+            inputEmail = inputEmail.trim();
+            if (inputEmail.isEmpty() || (inputEmail.contains("@") && inputEmail.contains("."))) {
+                break;
+            }
+            JOptionPane.showMessageDialog(this, "El Email debe contener los caracteres '@' y '.'. Inténtelo de nuevo.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+        }
+
+        final int MIN_DIGITS = 7;
+        final int MAX_DIGITS = 15;
+
+        while (true) {
+            inputTelefono = JOptionPane.showInputDialog(this, "Ingrese Teléfono del cliente (Mín. " + MIN_DIGITS + ", Máx. " + MAX_DIGITS + " dígitos, solo números):");
+            if (inputTelefono == null) {
+                inputTelefono = "";
+                break;
+            }
+            inputTelefono = inputTelefono.trim();
+
+            if (inputTelefono.isEmpty()) {
+                break;
+            }
+
+            try {
+                if (!inputTelefono.isEmpty()) {
+                    Long.parseLong(inputTelefono);
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "El Teléfono debe contener solo números.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+                continue;
+            }
+
+            if (inputTelefono.length() < MIN_DIGITS || inputTelefono.length() > MAX_DIGITS) {
+                JOptionPane.showMessageDialog(this, "El Teléfono debe tener entre " + MIN_DIGITS + " y " + MAX_DIGITS + " dígitos.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+                continue;
+            }
+
+            break;
+        }
+
         clienteId = inputId;
         clienteNombre = inputNombre.trim();
+        clienteEmail = inputEmail;
+        clienteTelefono = inputTelefono;
 
         int opcionUrgente = JOptionPane.showConfirmDialog(this, "¿Es atención urgente?", "Tipo de Turno", JOptionPane.YES_NO_OPTION);
         esUrgente = opcionUrgente == JOptionPane.YES_OPTION;
@@ -150,10 +197,12 @@ public class SimuladorGUI extends JFrame {
 
     private void handleRegistrar() {
         if (clienteId != null) {
-            controller.registrarCliente(clienteId, clienteNombre, "", "", esUrgente);
+            controller.registrarCliente(clienteId, clienteNombre, clienteEmail, clienteTelefono, esUrgente);
 
             clienteId = null;
             clienteNombre = null;
+            clienteEmail = null;
+            clienteTelefono = null;
             btnRegistrar.setEnabled(false);
 
             updateView();
